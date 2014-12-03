@@ -1,0 +1,9 @@
+[user] 
+    email = loic.farny@viacesi.fr
+    name = Nykrae
+
+[alias] 
+    ci = commit 
+    co = checkout 
+    st = status 
+    br = branch 
