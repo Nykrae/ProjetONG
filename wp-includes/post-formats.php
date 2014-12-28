@@ -99,6 +99,7 @@ function get_post_format_strings() {
 		'status'   => _x( 'Status',   'Post format' ),
 		'video'    => _x( 'Video',    'Post format' ),
 		'audio'    => _x( 'Audio',    'Post format' ),
+		'fiche'    => _x( 'Fiche',    'Post format' ),
 	);
 	return $strings;
 }

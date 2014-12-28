@@ -532,6 +532,8 @@ add_action( 'customize_preview_init', 'twentythirteen_customize_preview_js' );
 
 add_action('wp_insert_post', 'wpc_champs_personnalises_defaut');
 
+// Création de champs personnalisés
+
 function wpc_champs_personnalises_defaut($post_id)
  {
 	 if ( $_GET['post_type'] != 'page' ) {
@@ -544,3 +546,79 @@ function wpc_champs_personnalises_defaut($post_id)
 	 }
  	return true;
  }
+
+// Création de la recherche avancée
+
+add_filter('posts_where', 'advanced_search_query' );
+
+function advanced_search_query( $where )
+{
+  if( is_search() && !isset($_GET['post_type'])) {
+
+    global $wpdb;
+    $query = get_search_query();
+    $mot =  explode(" ", $query);
+
+    for ($i = 0 ; $i < count($mot) ; $i++) {
+
+    // 	echo "Mot ". $i ." : ".$mot[$i]."<br/>";
+    	$mot2 = $mot[$i+1];
+    	    	
+    	// étendre la recherche aux postmeta
+    $where .=" OR {$wpdb->posts}.ID IN (SELECT {$wpdb->postmeta}.post_id FROM {$wpdb->posts}, {$wpdb->postmeta} 
+    	WHERE {$wpdb->postmeta}.meta_key = 'type' 
+    	AND {$wpdb->postmeta}.meta_value LIKE '%$mot[$i]%' 
+    	AND {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id)";
+	
+	$where .=" OR {$wpdb->posts}.ID IN (SELECT {$wpdb->postmeta}.post_id FROM {$wpdb->posts}, {$wpdb->postmeta} 
+    	WHERE {$wpdb->postmeta}.meta_key = 'sexe' 
+    	AND {$wpdb->postmeta}.meta_value LIKE '%$mot[$i]%' 
+    	AND {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id)";
+
+	$where .=" OR {$wpdb->posts}.ID IN (SELECT {$wpdb->postmeta}.post_id FROM {$wpdb->posts}, {$wpdb->postmeta} 
+    	WHERE {$wpdb->postmeta}.meta_key = 'age' AND {$wpdb->postmeta}.meta_value LIKE '%$mot[$i]%' AND {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id)";
+
+	// $where .= " AND (($wpdb->postmeta.meta_key = 'type' AND $wpdb->postmeta.meta_value LIKE '%$mot[0]%' ') 
+	// 			AND ($wpdb->postmeta.meta_key = 'sexe' AND $wpdb->postmeta.meta_value LIKE '%$mot[1]%' )) ";
+
+    // étendre la recherche aux taxonomies
+    // $where .=" OR {$wpdb->posts}.ID IN (SELECT {$wpdb->posts}.ID FROM {$wpdb->posts},{$wpdb->term_relationships},{$wpdb->terms} WHERE {$wpdb->posts}.ID = {$wpdb->term_relationships}.object_id AND {$wpdb->term_relationships}.term_taxonomy_id = {$wpdb->terms}.term_id AND {$wpdb->terms}.name LIKE '%$mot[$i]%')";
+
+    }   
+
+    
+    if(WP_DEBUG)var_dump($where);
+    }
+
+    // print_r($where);
+    // die('hard');
+    return $where;
+}
+
+
+ /////// ESSAI 2
+
+// $result = get_search_query();
+// $mot =  explode(" ", $result);
+
+// 	$args = array(
+// 		'post_type' => 'fiche',
+// 		'meta_query' => array(
+// 				array(
+// 				'key' => 'type',
+// 				'value' => $mot,
+// 				'compare' => 'LIKE'
+// 				),
+// 				array(
+// 				'key' => 'sexe',
+// 				'value' => $mot[$i+1],
+// 				'compare' => 'LIKE'
+// 				)
+// 			)
+// 		 );
+
+// $query = new WP_Query( $args );
+
+
+//Permet de placer la gallery d'image pour les fiches là où je le souhaite
+remove_filter( 'the_content', 'easy_image_gallery_append_to_content' );   
